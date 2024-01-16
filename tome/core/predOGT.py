@@ -20,7 +20,7 @@ import sys
 import os
 import pandas as pd
 from Bio import SeqIO
-from sklearn.externals import joblib
+import joblib
 from collections import Counter
 from multiprocessing import Pool, cpu_count
 import numpy as np
@@ -164,6 +164,7 @@ def get_dimer_frequency(fasta_file,p):
             dimers_fq[a1+a2] = dimers.get(a1+a2,0.0)
     number_of_aa_in_fasta = sum(dimers_fq.values())
     for key,value in dimers_fq.items(): dimers_fq[key] = value/number_of_aa_in_fasta
+    import IPython; IPython.embed()
     return dimers_fq
 
 def predict(fasta_file,model,means,stds,features,p):
@@ -178,10 +179,21 @@ def predict(fasta_file,model,means,stds,features,p):
     pred_ogt = model.predict(Xs)[0]
     return np.around(pred_ogt,decimals=2)
 
+def predict_from_input(input_row,model,means,stds,features,outf):
+    Xs = list()
+    for fea in features:
+        Xs.append((input_row[fea]-means[fea])/stds[fea])
+
+    Xs = np.array(Xs).reshape([1,len(Xs)])
+
+    pred_ogt = model.predict(Xs)[0]
+    return np.around(pred_ogt,decimals=2)    
+
 
 def main(args):
     infile = args.fasta
     indir = args.indir
+    input_data = args.input
 
     outf = args.out
 
@@ -198,6 +210,16 @@ def main(args):
             if not name.endswith('.fasta'): continue
             pred_ogt = predict(os.path.join(indir,name),model,means,stds,features,args.threads)
             outf.write('{0}\t{1}\n'.format(name, pred_ogt))
+            
+    elif input_data is not None:
+        # load input data as pd
+        input_df = pd.read_csv(input_data)
+        # Iterate over each row
+        for index, row in input_df.iterrows():
+            pred_ogt = predict_from_input(row,model,means,stds,features,outf)
+            # write the results to the output file
+            outf.write('{0}\t{1}\n'.format(row['Organism'], pred_ogt))
+
     else: sys.exit('Please provide at least a fasta file or a directory that contains \
     a list of fasta files')
     outf.close()

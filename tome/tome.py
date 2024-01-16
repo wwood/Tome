@@ -43,6 +43,9 @@ def main():
     for a list of microorganisms. Important: Fasta file names much end with .fasta',
     metavar='',default=None)
 
+    parser_ogt.add_argument('--input',help='a tab-delimited file containing \
+        proteome names and their corresponding features already calculated.', default=None)
+
     parser_ogt.add_argument('--train',help='train the model again',
     action='store_true')
 

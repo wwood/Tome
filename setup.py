@@ -17,7 +17,7 @@ setup(
 	url='https://github.com/EngqvistLab/Tome',
     packages=find_packages(exclude=['test*']), #find folders containing scripts, exclude irrelevant ones
 	# package_dir={'':'tome'},
-    install_requires=['pandas','Biopython','numpy','sklearn'],
+    install_requires=['pandas','Biopython','numpy','scikit-learn'],
     include_package_data=True,
     package_data={'tome':['data/train.csv',
 						  'model/OGT_svr.f',
